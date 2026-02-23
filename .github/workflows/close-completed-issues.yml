@@ -6,16 +6,13 @@ on:
 
 jobs:
   close-issue:
+    if: github.event.label.name == 'completed'
     runs-on: ubuntu-latest
     steps:
-      - name: Close issue if labeled 'completed'
-        if: github.event.label.name == 'completed'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              state: 'closed'
-            })
+      - name: Close issue
+        run: |
+          curl -X PATCH \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }} \
+            -d '{"state":"closed"}'
